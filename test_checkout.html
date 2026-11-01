@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KFC Payment Module - Strict Test Suite Runner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        kfc: '#E4002B',
+                        kfcDark: '#B30022',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans p-4 sm:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-200 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="bg-kfc text-white text-xs font-black px-2.5 py-0.5 rounded tracking-wider">MODULE 2</span>
+                    <span class="text-xs font-bold text-gray-500 uppercase">Automated Unit & Integration Tests</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-black text-gray-900">Module Thanh Toán KFC - Test Suite</h1>
+                <p class="text-xs text-gray-500 mt-1">Kiểm thử nghiêm ngặt tính toàn vẹn dữ liệu, các luật validation, tính toán giá & mã giảm giá</p>
+            </div>
+            
+            <button onclick="executeAllTests()" class="bg-kfc hover:bg-kfcDark text-white px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-wider transition shadow-md flex items-center gap-2">
+                <span>🔄 Chạy Lại Tests</span>
+            </button>
+        </div>
+
+        <!-- Summary KPI Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-2xl border border-gray-200 text-center">
+                <span class="text-xs text-gray-500 font-bold block mb-1">Tổng Số Tests</span>
+                <span id="stat-total" class="text-2xl font-black text-gray-900">--</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-gray-200 text-center">
+                <span class="text-xs text-gray-500 font-bold block mb-1">Đạt (Passed)</span>
+                <span id="stat-passed" class="text-2xl font-black text-emerald-600">--</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-gray-200 text-center">
+                <span class="text-xs text-gray-500 font-bold block mb-1">Thất Bại (Failed)</span>
+                <span id="stat-failed" class="text-2xl font-black text-red-600">--</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-gray-200 text-center">
+                <span class="text-xs text-gray-500 font-bold block mb-1">Thời Gian Chạy</span>
+                <span id="stat-time" class="text-2xl font-black text-blue-600">-- ms</span>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-gray-200 h-2.5 rounded-full mb-6 overflow-hidden">
+            <div id="test-progress" class="bg-emerald-500 h-full w-0 transition-all duration-500"></div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h2 class="font-extrabold text-sm uppercase text-gray-700 tracking-wider">Chi Tiết Kết Quả Kiểm Thử</h2>
+                <span id="status-badge" class="text-xs font-bold px-3 py-1 rounded-full bg-gray-200 text-gray-700">Đang chuẩn bị...</span>
+            </div>
+            
+            <div id="test-list" class="divide-y divide-gray-100">
+                <div class="p-8 text-center text-gray-400 text-sm">Đang nạp bộ test case...</div>
+            </div>
+        </div>
+
+        <!-- Live Sandbox / Interactive Test Tool -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-200">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="text-xl">🧪</span>
+                <h3 class="font-black text-lg text-gray-900">Sandbox Kiểm Thử Thực Tế</h3>
+            </div>
+            <p class="text-xs text-gray-500 mb-6">Bạn có thể thử nghiệm trực tiếp hàm <code class="bg-gray-100 px-1 py-0.5 rounded text-kfc font-bold">KFCCheckout.createOrder()</code> với các tham số tự nhập:</p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs mb-4">
+                <div>
+                    <label class="font-bold block mb-1">Tên khách hàng:</label>
+                    <input type="text" id="sb-name" value="Phạm Thu Hà" class="w-full border p-2 rounded-xl">
+                </div>
+                <div>
+                    <label class="font-bold block mb-1">Số điện thoại:</label>
+                    <input type="text" id="sb-phone" value="0988776655" class="w-full border p-2 rounded-xl">
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="font-bold block mb-1">Địa chỉ giao:</label>
+                    <input type="text" id="sb-address" value="Số 10 Nguyễn Huệ, Quận 1, TP Hồ Chí Minh" class="w-full border p-2 rounded-xl">
+                </div>
+                <div>
+                    <label class="font-bold block mb-1">Mã giảm giá (Coupon):</label>
+                    <input type="text" id="sb-coupon" value="KFC20K" class="w-full border p-2 rounded-xl uppercase">
+                </div>
+                <div>
+                    <label class="font-bold block mb-1">Phương thức thanh toán:</label>
+                    <select id="sb-method" class="w-full border p-2 rounded-xl">
+                        <option value="MOMO">MOMO - Ví điện tử MoMo</option>
+                        <option value="VNPAY">VNPAY - Cổng thanh toán VNPAY / VNPAY-QR</option>
+                        <option value="QR_CODE">QR_CODE - Quét mã QR thanh toán (VietQR 24/7)</option>
+                        <option value="COD">COD - Tiền mặt khi nhận hàng</option>
+                    </select>
+                </div>
+            </div>
+
+            <button onclick="runSandboxTest()" class="bg-gray-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-bold text-xs transition">
+                ⚡ Chạy Thử Nghiệm Sandbox
+            </button>
+
+            <pre id="sb-output" class="mt-4 p-4 bg-gray-900 text-green-400 rounded-2xl text-[11px] overflow-x-auto max-h-64 font-mono hidden"></pre>
+        </div>
+    </div>
+
+    <!-- Nạp Module Thanh Toán & Bộ Test -->
+    <script src="./js/checkout.js"></script>
+    <script src="./tests/checkout.test.js"></script>
+
+    <script>
+        async function executeAllTests() {
+            const listContainer = document.getElementById('test-list');
+            const statusBadge = document.getElementById('status-badge');
+            
+            listContainer.innerHTML = '<div class="p-8 text-center text-gray-500 text-sm">Đang thực thi các test case...</div>';
+            statusBadge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-blue-100 text-blue-700';
+            statusBadge.innerText = 'Đang chạy...';
+
+            const startTime = performance.now();
+            const result = await runner.run();
+            const endTime = performance.now();
+            const duration = Math.round(endTime - startTime);
+
+            // Cập nhật thống kê KPI
+            document.getElementById('stat-total').innerText = result.total;
+            document.getElementById('stat-passed').innerText = result.passed;
+            document.getElementById('stat-failed').innerText = result.failed;
+            document.getElementById('stat-time').innerText = duration + ' ms';
+
+            const percent = Math.round((result.passed / result.total) * 100);
+            const progressBar = document.getElementById('test-progress');
+            progressBar.style.width = percent + '%';
+
+            if (result.failed === 0) {
+                progressBar.className = 'bg-emerald-500 h-full transition-all duration-500';
+                statusBadge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700';
+                statusBadge.innerText = `100% ĐẠT (${result.passed}/${result.total} PASSED)`;
+            } else {
+                progressBar.className = 'bg-red-500 h-full transition-all duration-500';
+                statusBadge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-red-100 text-red-700';
+                statusBadge.innerText = `${result.failed} TEST THẤT BẠI`;
+            }
+
+            // Render danh sách chi tiết
+            listContainer.innerHTML = result.results.map((r, idx) => {
+                const isPass = r.status === 'PASS';
+                return `
+                    <div class="p-4 flex items-start justify-between gap-4 hover:bg-gray-50 transition">
+                        <div class="flex items-start gap-3">
+                            <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center text-xs font-black ${isPass ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}">
+                                ${isPass ? '✓' : '✕'}
+                            </span>
+                            <div>
+                                <span class="font-bold text-xs sm:text-sm text-gray-900">${r.name}</span>
+                                ${!isPass ? `<p class="text-xs text-red-600 mt-1 font-mono bg-red-50 p-2 rounded">${r.error.message}</p>` : ''}
+                            </div>
+                        </div>
+                        <span class="text-[11px] font-black px-2.5 py-1 rounded-full uppercase ${isPass ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}">
+                            ${r.status}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function runSandboxTest() {
+            const out = document.getElementById('sb-output');
+            out.classList.remove('hidden');
+
+            const mockCart = [
+                { id: 1, name: 'Gà Rán Giòn Tan', price: 39000, qty: 2 },
+                { id: 2, name: 'Combo Gà Viên Popcorn', price: 89000, qty: 1 }
+            ];
+
+            try {
+                const order = KFCCheckout.createOrder({
+                    cart: mockCart,
+                    customerName: document.getElementById('sb-name').value,
+                    phoneNumber: document.getElementById('sb-phone').value,
+                    deliveryAddress: document.getElementById('sb-address').value,
+                    couponCode: document.getElementById('sb-coupon').value,
+                    paymentMethod: document.getElementById('sb-method').value
+                });
+
+                out.innerText = '✅ TẠO ĐƠN HÀNG THÀNH CÔNG:\n' + JSON.stringify(order, null, 2);
+            } catch (err) {
+                out.innerText = '❌ LỖI VALIDATION:\n' + err.message + '\n(Field: ' + (err.field || 'unknown') + ')';
+            }
+        }
+
+        // Tự động chạy khi tải trang
+        window.addEventListener('DOMContentLoaded', () => {
+            executeAllTests();
+        });
+    </script>
+</body>
+</html>
